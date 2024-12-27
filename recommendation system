@@ -1,0 +1,117 @@
+def initialize_movie_database():
+    """Initialize movie database with movies and their genres"""
+    return {
+        'The Shawshank Redemption': {'genres': ['Drama', 'Crime']},
+        'The Godfather': {'genres': ['Drama', 'Crime']},
+        'The Dark Knight': {'genres': ['Action', 'Crime', 'Drama']},
+        'Inception': {'genres': ['Action', 'Sci-Fi', 'Thriller']},
+        'Matrix': {'genres': ['Action', 'Sci-Fi']},
+        'Jurassic Park': {'genres': ['Adventure', 'Sci-Fi']},
+        'Titanic': {'genres': ['Drama', 'Romance']},
+        'Avatar': {'genres': ['Action', 'Adventure', 'Sci-Fi']},
+        'The Lion King': {'genres': ['Animation', 'Adventure', 'Drama']},
+        'Forrest Gump': {'genres': ['Drama', 'Romance']},
+        'Star Wars': {'genres': ['Action', 'Adventure', 'Sci-Fi']},
+        'The Avengers': {'genres': ['Action', 'Adventure', 'Sci-Fi']},
+        'Finding Nemo': {'genres': ['Animation', 'Adventure', 'Comedy']},
+        'The Silence of the Lambs': {'genres': ['Crime', 'Drama', 'Thriller']},
+        'Gladiator': {'genres': ['Action', 'Adventure', 'Drama']},
+        'Toy Story': {'genres': ['Animation', 'Adventure', 'Comedy']},
+        'Interstellar': {'genres': ['Sci-Fi', 'Adventure', 'Drama']},
+        'Spider-Man': {'genres': ['Action', 'Adventure', 'Sci-Fi']}
+    }
+
+def get_all_genres(movie_db):
+    """Get a sorted list of all unique genres in the database"""
+    genres = set()
+    for movie in movie_db.values():
+        genres.update(movie['genres'])
+    return sorted(list(genres))
+
+def validate_genres(input_genres, all_genres):
+    """Validate and format user input genres"""
+    valid_genres = []
+    invalid_genres = []
+    
+    for genre in input_genres:
+        # Clean the input genre
+        cleaned_genre = genre.strip().title()
+        if cleaned_genre in all_genres:
+            valid_genres.append(cleaned_genre)
+        else:
+            invalid_genres.append(genre.strip())
+            
+    return valid_genres, invalid_genres
+
+def get_recommendations(preferred_genres, movie_db):
+    """Get movie recommendations based on preferred genres"""
+    recommendations = []
+    
+    for movie_title, movie_info in movie_db.items():
+        movie_genres = set(movie_info['genres'])
+        matching_genres = movie_genres.intersection(preferred_genres)
+        
+        if matching_genres:  # If there's at least one matching genre
+            match_score = len(matching_genres) / len(preferred_genres)
+            recommendations.append({
+                'title': movie_title,
+                'genres': movie_info['genres'],
+                'matching_genres': list(matching_genres),
+                'score': match_score
+            })
+    
+    # Sort by match score
+    recommendations.sort(key=lambda x: x['score'], reverse=True)
+    return recommendations
+
+def display_recommendations(recommendations):
+    """Display movie recommendations in a formatted way"""
+    print(f"\nFound {len(recommendations)} matching movies:\n")
+    print("-" * 60)
+    
+    for movie in recommendations:
+        print(f"Movie: {movie['title']}")
+        print(f"All Genres: {', '.join(movie['genres'])}")
+        print(f"Matching Genres: {', '.join(movie['matching_genres'])}")
+        print(f"Match Score: {movie['score']:.2f}")
+        print("-" * 60)
+
+def main():
+    # Initialize database and get all possible genres
+    movie_db = initialize_movie_database()
+    all_genres = get_all_genres(movie_db)
+    
+    while True:
+        # Display available genres
+        print("\nAvailable genres:")
+        print(", ".join(all_genres))
+        
+        # Get user input
+        user_input = input("\nEnter your preferred genres (separate with commas): ")
+        if not user_input.strip():
+            print("Please enter at least one genre.")
+            continue
+            
+        # Process user input
+        input_genres = [g.strip() for g in user_input.split(',') if g.strip()]
+        valid_genres, invalid_genres = validate_genres(input_genres, all_genres)
+        
+        # Handle invalid genres
+        if invalid_genres:
+            print(f"\nWarning: Invalid genres found: {', '.join(invalid_genres)}")
+            print("Please use genres from the available list.")
+        
+        # Get and display recommendations if we have valid genres
+        if valid_genres:
+            print(f"\nSearching for movies matching: {', '.join(valid_genres)}")
+            recommendations = get_recommendations(valid_genres, movie_db)
+            display_recommendations(recommendations)
+        
+        # Ask if user wants to try again
+        if input("\nWould you like to try another search? (yes/no): ").lower() != 'yes':
+            print("\nThank you for using the Movie Recommender!")
+            break
+
+if __name__ == "__main__":
+    print("Welcome to the Movie Recommender System!")
+    main()
